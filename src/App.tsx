@@ -191,7 +191,7 @@ const personnages: IPersonnage[] = [
       FaiblesseType.AttaqueSurnaturelle,
       FaiblesseType.AttaqueDemoniaque
     ],
-    faiblesseUltime: "Munition"
+    faiblesseUltime: "Munitions"
   },
   {
     name: "Zombie",
@@ -305,24 +305,29 @@ function App() {
       if (personnage.cards < nbCards) {
         return false;
       }
-      if (
-        selectedFaiblesses.some(
-          (faiblesse) =>
-            !personnage.faiblesses.includes(faiblesse)
-        )
-      ) {
-        return false;
-      }
-      if (
-        notFaiblesses.some((faiblesse) =>
+
+      const reallySelectedFaiblesses =
+        selectedFaiblesses.filter(
+          (faiblesse) => !notFaiblesses.includes(faiblesse)
+        );
+
+      const hasAllSelectedFaiblesses =
+        reallySelectedFaiblesses.every((faiblesse) =>
           personnage.faiblesses.includes(faiblesse)
-        )
-      ) {
-        return false;
-      }
-      return true;
+        );
+
+      const hasNoneOfNotFaiblesses = notFaiblesses.every(
+        (faiblesse) =>
+          !personnage.faiblesses.includes(faiblesse)
+      );
+
+      return (
+        hasAllSelectedFaiblesses && hasNoneOfNotFaiblesses
+      );
     });
   }, [nbCards, selectedFaiblesses, notFaiblesses]);
+
+  console.log("state", selectedFaiblesses, notFaiblesses);
 
   return (
     <div className="App">
@@ -363,20 +368,15 @@ function App() {
                 if (
                   selectedFaiblesses.includes(faiblesse)
                 ) {
+                  if (notFaiblesses.includes(faiblesse)) {
+                    setNotFaiblesses(
+                      notFaiblesses.filter(
+                        (f) => f !== faiblesse
+                      )
+                    );
+                  }
                   setSelectedFaiblesses(
                     selectedFaiblesses.filter(
-                      (f) => f !== faiblesse
-                    )
-                  );
-                  setNotFaiblesses([
-                    ...notFaiblesses,
-                    faiblesse
-                  ]);
-                  return;
-                }
-                if (notFaiblesses.includes(faiblesse)) {
-                  setNotFaiblesses(
-                    notFaiblesses.filter(
                       (f) => f !== faiblesse
                     )
                   );
@@ -424,7 +424,7 @@ function App() {
           <tr>
             <th>Personnage</th>
             <th>Cards</th>
-            <th>PV</th>
+            {/* <th>PV</th> */}
             <th>Faiblesses</th>
             <th>Faiblesse ultime</th>
           </tr>
@@ -434,7 +434,7 @@ function App() {
             <tr key={index}>
               <td>{personnage.name}</td>
               <td>{personnage.cards}</td>
-              <td>{personnage.pv}</td>
+              {/* <td>{personnage.pv}</td> */}
               <td>
                 {personnage.faiblesses.map(
                   (faiblesse, index) => (
